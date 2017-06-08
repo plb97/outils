@@ -1,3 +1,4 @@
+// Copyright 2017 plb97. All rights reserved.
 package outils
 
 import (
