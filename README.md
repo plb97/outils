@@ -1,22 +1,22 @@
 # Exemples d'utilisation du langage **Go** de *Google*
 
-Le point de départ de ces **exemples** est le besoin de récupération de la liste des clés d'une 'map' quel que soit sont type.
+Le point de départ de ces **exemples** est le besoin de récupération de la liste des clés d'une *'map'* quel que soit sont type.
 
-Pour cela l'utilisation du package 'reflect' s'est imposée.
+Pour cela l'utilisation du package __*'reflect'*__ s'est imposée.
 Les conclusions des nombreux tâtonnements autour de l'utilisation de ce package sont montrées ici.
 
 ## Liste des clés d'une 'map'
-La fonction **Lister_cles**('map') retourne sous forme d'*interface* la liste des clés de la table passée en paramètre.
+La fonction **Lister_cles**('map') retourne sous forme d'__*interface*__ la liste des clés de la table passée en paramètre.
 Si c'est possible, la liste est triée par ordre croissant.
-Le résultat obtenu doit être 'casté' par exemple : liste.([]int) pour une liste d'entiers ou liste.([]float64) pour une liste de réels.
+Le résultat obtenu doit être "casté" par exemple : liste.([]int) pour une liste d'entiers ou liste.([]float64) pour une liste de réels.
 
 En complément, trois fonctions spécialisées :
 
 **Fonction** | Commentaire
 ------------ | -----------
-**Lister_cles_string**(i interface{}) []string | liste des clés 'string'
-**Lister_cles_int**(i interface{}) []int | liste des clés 'int'
-**Lister_cles_float64**(i interface{}) []float64 | liste des clés 'float64'
+**Lister_cles_string**(i interface{}) []string | liste des clés *'string'*
+**Lister_cles_int**(i interface{}) []int | liste des clés *'int'*
+**Lister_cles_float64**(i interface{}) []float64 | liste des clés *'float64'*
 
 
 ## Ensemble d'éléments de même 'type'
@@ -27,7 +27,7 @@ En particulier, elle peut s'appliquer à elle-même (des ensembles d'ensembles).
 
 La fonction **Creer**([]'type') crée un ensemble d'éléments de type 'type'.
 
-Les actions suivantes peuvent s'effecteur sur un 'Ensemble' :
+Les actions suivantes peuvent s'effecteur sur un *'Ensemble'* :
 
 **Methode** | Commentaire
 ----------- | -----------
