@@ -20,7 +20,7 @@ En complément, trois fonctions spécialisées :
 
 
 De là, l'idée d'utiliser ce même package pour introduire la notion d'ensembles comme dans le langage Pascal a émergé.
-Cette notion peut s'appiquer au types simples mais aussi aux structures, tableaux et autres.
+Cette notion peut s'appliquer au types simples mais aussi aux structures, tableaux et autres.
 En particulier, cette notion peut s'appliquer à elle-même (des ensembles d'ensembles).
 La fonction *Creer*([]'type') crée un ensemble d'éléments de type 'type'.
 
