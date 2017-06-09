@@ -58,7 +58,7 @@ func lister_cles(i interface{}) interface{} {
 	//case reflect.String:  sort.Strings(lki.([]string));
 	//case reflect.Int:     sort.Ints(lki.([]int))
 	//case reflect.Float64: sort.Float64s(lki.([]float64))
-	// les cles doivennt etre de 'type' "ordonnable"
+	// les cles doivent etre de 'type' "ordonnable"
 	// c-a-d que 'x' < 'y' est autorise par le langage
 	// par exemple : '1' < '0' est autorise mais 'false' < 'true' ne l'est pas
 	case reflect.String:
