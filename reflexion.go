@@ -389,9 +389,6 @@ func (pe *ens_t) intersecter(px *ens_t) *ens_t {
 	if nil == px {
 		return pe
 	}
-	if pe.t.Kind() != px.t.Kind() {
-		return pe
-	}
 	for _, elmt := range pe.m.MapKeys() {
 		if pe.ind {
 			elmt = pe.m.MapIndex(elmt)
@@ -411,10 +408,7 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 	if nil == pe || nil == pe.t {
 		panic("soustraire")
 	}
-	if nil == px || nil == px.t {
-		return pe
-	}
-	if pe.t.Kind() != px.t.Kind() {
+	if nil == px || nil == px.t || pe.t.Kind() != px.t.Kind() {
 		return pe
 	}
 	if pe.m.Len() < px.m.Len() {
