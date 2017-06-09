@@ -188,7 +188,7 @@ type ens_t struct {
 func new_ens_t(ind bool, t reflect.Type) *ens_t {
 	var m reflect.Value
 	var msi map[string]int
-	if ind {                                          // en cas d'indirection
+	if ind { // en cas d'indirection
 		msi = make(map[string]int)
 		m = reflect.MakeMap(reflect.MapOf(reflect.TypeOf(0), t))
 	} else { // pas d'indirection
