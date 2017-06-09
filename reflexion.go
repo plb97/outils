@@ -197,28 +197,6 @@ func new_ens_t(ind bool, t reflect.Type) *ens_t {
 	e := ens_t{t: t, ind: ind, m: m, msi: msi}
 	return &e
 }
-// la fonction 'ajouter' permet d'ajouter un element a l'ensemble
-func (pe *ens_t) ajouter(i interface{}) *ens_t {
-	if nil == i {
-		panic("ajouter")
-	}
-	v := reflect.ValueOf(i)
-	if !v.Type().ConvertibleTo(pe.t) {
-		panic(fmt.Sprintf("ajouter : pe.t=%v v=%v",pe.t.Kind(), v.Kind()))
-	}
-	v = v.Convert(pe.t)
-	if pe.ind {
-		k := ident(i)
-		if _, ok := pe.msi[k]; !ok {
-			ki := pe.m.Len() // nouvel index
-			pe.m.SetMapIndex(reflect.ValueOf(ki), v)
-			pe.msi[k] = ki
-		}
-	} else {
-		pe.m.SetMapIndex(v, reflect.ValueOf(true))
-	}
-	return pe
-}
 
 // la fonction 'creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
 // representee par l'interface passee en parametre
@@ -245,6 +223,29 @@ func (pe *ens_t) copier() *ens_t {
 		px.ajouter(elmt)
 	}
 	return px
+}
+
+// la fonction 'ajouter' permet d'ajouter un element a l'ensemble
+func (pe *ens_t) ajouter(i interface{}) *ens_t {
+	if nil == i {
+		panic("ajouter")
+	}
+	v := reflect.ValueOf(i)
+	if !v.Type().ConvertibleTo(pe.t) {
+		panic(fmt.Sprintf("ajouter : pe.t=%v v=%v",pe.t.Kind(), v.Kind()))
+	}
+	v = v.Convert(pe.t)
+	if pe.ind {
+		k := ident(i)
+		if _, ok := pe.msi[k]; !ok {
+			ki := pe.m.Len() // nouvel index
+			pe.m.SetMapIndex(reflect.ValueOf(ki), v)
+			pe.msi[k] = ki
+		}
+	} else {
+		pe.m.SetMapIndex(v, reflect.ValueOf(true))
+	}
+	return pe
 }
 
 // la fonction 'ajouter_liste' permet d'ajouter tous les elements d'une liste a l'ensemble
