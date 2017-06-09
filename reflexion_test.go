@@ -44,28 +44,28 @@ func TestEnsInt(t *testing.T) {
 		attendu := reflect.Int
 		obtenu := ei12.t.Kind()
 		if attendu != obtenu {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // nombre
 		attendu := len(li12)
 		obtenu := ei12.Nombre()
 		if attendu != obtenu {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // liste
 		attendu := li12
 		obtenu := ei12.lister().([]int)
 		if !reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // liste
 		attendu := li12
 		obtenu := ei21.lister().([]int)
 		if !reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // liste
@@ -74,24 +74,24 @@ func TestEnsInt(t *testing.T) {
 		sort.Ints(attendu)              // ([]{1,2,2})
 		obtenu := ei21.Lister().([]int) // ([]{1,2})
 		if reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // egal
 		attendu := ei21
 		obtenu := ei12
 		if attendu == obtenu { // pointeurs differents
-			t.Errorf(test+": attendu %p != obtenu %p\n", ei12, obtenu)
+			t.Errorf(test+": attendu %p == obtenu %p\n", ei12, obtenu)
 		}
 		if !attendu.egal(obtenu) { // ensembles egaux
-			t.Errorf(test+": attendu %v == obtenu %v\n", true, false)
+			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
 		}
 	}
 	{ // pas egal
 		attendu := ei12
 		obtenu := ei23
 		if attendu.egal(obtenu) { // ensembles pas egaux
-			t.Errorf(test+": attendu %v != obtenu %v\n", false, true)
+			t.Errorf(test+": attendu %v == obtenu %v\n", false, true)
 		}
 	}
 	{ // union
@@ -353,14 +353,14 @@ func TestEnsembleInt(t *testing.T) {
 		attendu := li12
 		obtenu := ei12.Lister().([]int)
 		if !reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // liste
 		attendu := li12
 		obtenu := ei21.Lister().([]int)
 		if !reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // liste
@@ -369,24 +369,24 @@ func TestEnsembleInt(t *testing.T) {
 		sort.Ints(attendu)              // ([]{1,2,2})
 		obtenu := ei21.Lister().([]int) // ([]{1,2})
 		if reflect.DeepEqual(attendu, obtenu) {
-			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
 		}
 	}
 	{ // egal
 		attendu := ei21
 		obtenu := ei12
 		if attendu == obtenu { // pointeurs differents
-			t.Errorf(test+": attendu %p != obtenu %p\n", ei12, obtenu)
+			t.Errorf(test+": attendu %p == obtenu %p\n", ei12, obtenu)
 		}
 		if !attendu.Egal(obtenu) { // ensembles egaux
-			t.Errorf(test+": attendu %v == obtenu %v\n", true, false)
+			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
 		}
 	}
 	{ // pas egal
 		attendu := ei12
 		obtenu := ei23
 		if attendu.Egal(obtenu) { // ensembles pas egaux
-			t.Errorf(test+": attendu %v != obtenu %v\n", false, true)
+			t.Errorf(test+": attendu %v == obtenu %v\n", false, true)
 		}
 	}
 	{ // union
