@@ -27,17 +27,17 @@ func TestEnsInt(t *testing.T) {
 	test := "TestEnsInt"
 	fmt.Println(test)
 	var (
-		ei12   = Creer(li12)
-		ei21   = Creer(li21)
-		ei23   = Creer(li23)
-		ei34   = Creer(li34)
-		ei123  = Creer(li123)
-		ei1234 = Creer(li1234)
-		ei1    = Creer(li1)
-		ei2    = Creer(li2)
-		ei3    = Creer(li3)
-		ei     = Creer(li)
-		esab   = Creer(lsab)
+		ei12   = creer(li12)
+		ei21   = creer(li21)
+		ei23   = creer(li23)
+		ei34   = creer(li34)
+		ei123  = creer(li123)
+		ei1234 = creer(li1234)
+		ei1    = creer(li1)
+		ei2    = creer(li2)
+		ei3    = creer(li3)
+		ei     = creer(li)
+		esab   = creer(lsab)
 	)
 
 	{ // type
@@ -220,15 +220,15 @@ func TestEnsIntInd(t *testing.T) {
 	test := "TestEnsIntInd"
 	fmt.Println(test)
 	var (
-		ei12   = Creer(li12)
-		ei21   = Creer(li21)
-		ei23   = Creer(li23)
-		esab   = Creer(lsab)
+		ei12   = creer(li12)
+		ei21   = creer(li21)
+		ei23   = creer(li23)
+		esab   = creer(lsab)
 
-		eei     = Creer([]*ens_t{})
-		eei12   = Creer([]*ens_t{ei12, ei21, ei12})
-		eei23   = Creer([]*ens_t{ei23})
-		eei1223 = Creer([]*ens_t{ei12, ei23})
+		eei     = creer([]*ens_t{})
+		eei12   = creer([]*ens_t{ei12, ei21, ei12})
+		eei23   = creer([]*ens_t{ei23})
+		eei1223 = creer([]*ens_t{ei12, ei23})
 	)
 	{ // vide
 		attendu := false
@@ -314,8 +314,8 @@ func TestEnsIntInd(t *testing.T) {
 		}
 	}
 	{ // ajouter
-		attendu := Creer([]*ens_t{ei12,esab})
-		obtenu := Creer([]*ens_t{ei12}).ajouter(esab)
+		attendu := creer([]*ens_t{ei12,esab})
+		obtenu := creer([]*ens_t{ei12}).ajouter(esab)
 		if !obtenu.egal(attendu) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
@@ -329,17 +329,17 @@ func TestEnsembleInt(t *testing.T) {
 	test := "TestEnsembleInt"
 	fmt.Println(test)
 	var (
-		ei12 Ensemble   = Creer(li12)
-		ei21 Ensemble   = Creer(li21)
-		ei23 Ensemble   = Creer(li23)
-		ei34 Ensemble   = Creer(li34)
-		ei123 Ensemble  = Creer(li123)
-		ei1234 Ensemble = Creer(li1234)
-		ei1 Ensemble    = Creer(li1)
-		ei2 Ensemble    = Creer(li2)
-		ei3 Ensemble    = Creer(li3)
-		ei Ensemble     = Creer(li)
-		esab Ensemble   = Creer(lsab)
+		ei12    = Creer(li12)
+		ei21    = Creer(li21)
+		ei23    = Creer(li23)
+		ei34    = Creer(li34)
+		ei123   = Creer(li123)
+		ei1234  = Creer(li1234)
+		ei1     = Creer(li1)
+		ei2     = Creer(li2)
+		ei3     = Creer(li3)
+		ei      = Creer(li)
+		esab    = Creer(lsab)
 	)
 
 	{ // nombre
@@ -508,15 +508,15 @@ func TestEnsembleIntInd(t *testing.T) {
 	test := "TestEnsembleIntInd"
 	fmt.Println(test)
 	var (
-		ei12 Ensemble   = Creer(li12)
-		ei21 Ensemble   = Creer(li21)
-		ei23 Ensemble   = Creer(li23)
-		esab Ensemble   = Creer(lsab)
+		ei12    = Creer(li12)
+		ei21    = Creer(li21)
+		ei23    = Creer(li23)
+		esab    = Creer(lsab)
 
-		eei Ensemble     = Creer([]Ensemble{})
-		eei12 Ensemble   = Creer([]Ensemble{ei12, ei21, ei12})
-		eei23 Ensemble   = Creer([]Ensemble{ei23})
-		eei1223 Ensemble = Creer([]Ensemble{ei12, ei23})
+		eei     = Creer([]Ensemble{})
+		eei12   = Creer([]Ensemble{ei12, ei21, ei12})
+		eei23   = Creer([]Ensemble{ei23})
+		eei1223 = Creer([]Ensemble{ei12, ei23})
 	)
 	{ // vide
 		attendu := false
@@ -602,8 +602,8 @@ func TestEnsembleIntInd(t *testing.T) {
 		}
 	}
 	{ // ajouter
-		var attendu Ensemble = Creer([]Ensemble{ei12,esab})
-		var obtenu Ensemble = Creer([]Ensemble{ei12}).ajouter(esab)
+		attendu := Creer([]Ensemble{ei12,esab})
+		obtenu := Creer([]Ensemble{ei12}).Ajouter(esab)
 		if !obtenu.Egal(attendu) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}

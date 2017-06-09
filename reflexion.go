@@ -439,9 +439,9 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 	return pe
 }
 
-// la fonction 'Creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
+// la fonction 'creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
 // representee par l'interface passee en parametre
-func Creer(i interface{}) *ens_t {
+func creer(i interface{}) *ens_t {
 	vi := reflect.ValueOf(i)
 	if reflect.Slice != vi.Kind() {
 		panic("Creer")
@@ -453,7 +453,11 @@ func Creer(i interface{}) *ens_t {
 	e := new_ens_t(ind,t).ajouter_liste(vi)
 	return e
 }
-
+// la fonction 'Creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
+// representee par l'interface passee en parametre
+func Creer(i interface{}) Ensemble {
+	return creer(i)
+}
 // la fonction 'Ajouter' permet d'ajouter des elements a l'ensemble
 func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
 	if nil == pe {
