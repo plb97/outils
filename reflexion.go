@@ -139,7 +139,7 @@ var nul = &ens_t{t: reflect.TypeOf(nil)}
 var nulle = reflect.Value{}
 
 // la fonction 'ident' retourne une chaine identifiant l'interface
-// REMARQUE : peut etre ameliorer...
+// REMARQUE : peut etre amelioree...
 func ident(i interface{}) string {
 	return fmt.Sprintf("%T:%v", i, i)
 }
