@@ -96,21 +96,21 @@ func lister_cles(i interface{}) interface{} {
 var Lister_cles = lister_cles
 
 func Lister_cles_string(i interface{}) []string {
-	if lk := Lister_cles(i); nil == lk {
+	if lk := lister_cles(i); nil == lk {
 		return nil
 	} else {
 		return lk.([]string)
 	}
 }
 func Lister_cles_int(i interface{}) []int {
-	if lk := Lister_cles(i); nil == lk {
+	if lk := lister_cles(i); nil == lk {
 		return nil
 	} else {
 		return lk.([]int)
 	}
 }
 func Lister_cles_float64(i interface{}) []float64 {
-	if lk := Lister_cles(i); nil == lk {
+	if lk := lister_cles(i); nil == lk {
 		return nil
 	} else {
 		return lk.([]float64)
