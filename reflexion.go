@@ -230,7 +230,7 @@ func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
 	return pe
 }
 
-// la fonction 'copier' permet de "cloner" une ensemble
+// la fonction 'copier' permet de "cloner" un ensemble
 // REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
 func (pe *ens_t) copier() *ens_t {
 	px := new_ens_t(pe.ind,pe.t)
@@ -296,7 +296,7 @@ func (pe *ens_t) contient(v reflect.Value) bool {
 	}
 }
 
-// la fonction 'nombre' retourne le nombre d'elements (cardinal) de l'enmbme l'ensemble
+// la fonction 'nombre' retourne le nombre d'elements (cardinal) de l'ensemble
 func (pe *ens_t) nombre() int {
 	if nil == pe {
 		return 0
