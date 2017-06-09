@@ -13,7 +13,7 @@ En complément, trois fonctions spécialisées :
 
 **Fonction** | Commentaire
 ------------ | -----------
-**Lister_cles_string(i interface{}) []string | liste de clés 'string'
+**Lister_cles_string(i interface{}) []string | liste des clés 'string'
 **Lister_cles_int(i interface{}) []int | liste des clés 'int'
 **Lister_cles_float64(i interface{}) []float64 | liste des clés 'float64'
 
