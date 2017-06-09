@@ -1,6 +1,6 @@
 # outils
 
-Le point de départ de cet **exemple** est le besoin de récupération de la liste des clés d'une 'map' quelle que soit sont type.
+Le point de départ de cet **exemple** est le besoin de récupération de la liste des clés d'une 'map' quel que soit sont type.
 Pour cela l'utilisation du package 'reflect' s'est imposée.
 Les conclusions des nombreux tâtonnements autour de l'utilisation de ce package sont montrées ici.
 
