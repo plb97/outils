@@ -165,6 +165,7 @@ type Ensemble interface {
 	Contient(i interface{}) bool
 	Nombre() int
 	Vide() bool
+	Copier() Ensemble
 	Egal(x Ensemble) bool
 	Unir(x Ensemble) Ensemble       // comparable a Ajouter
 	Soustraire(x Ensemble) Ensemble // comparable a Retirer
@@ -216,12 +217,11 @@ func creer(i interface{}) *ens_t {
 // la fonction 'copier' permet de "cloner" un ensemble
 // REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
 func (pe *ens_t) copier() *ens_t {
-	px := new_ens_t(pe.ind,pe.t)
-	vl := reflect.ValueOf(pe.lister())
-	for i := 0; i < vl.Len(); i++ {
-		elmt := vl.Index(i).Interface()
-		px.ajouter(elmt)
+	if nil == pe {
+		return nil
 	}
+	px := new_ens_t(pe.ind,pe.t)
+	px.unir(pe)
 	return px
 }
 
@@ -461,6 +461,14 @@ func Creer(i interface{}) Ensemble {
 	return creer(i)
 }
 
+// la fonction 'copier' permet de "cloner" un ensemble
+// REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
+func (pe *ens_t) Copier() Ensemble {
+	if nil == pe {
+		panic("Copier")
+	}
+	return pe.copier()
+}
 // la fonction 'Ajouter' permet d'ajouter des elements a l'ensemble
 func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
 	if nil == pe {
