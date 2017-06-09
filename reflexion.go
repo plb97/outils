@@ -461,7 +461,7 @@ func Creer(i interface{}) Ensemble {
 	return creer(i)
 }
 
-// la fonction 'copier' permet de "cloner" un ensemble
+// la fonction 'Copier' permet de "cloner" un ensemble
 // REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
 func (pe *ens_t) Copier() Ensemble {
 	if nil == pe {
