@@ -185,10 +185,9 @@ type ens_t struct {
 // la fonction new_ens_t' retourne un pointeur '*ens_t' sur un ensemble vide
 // dont les elements doivent etre de type 't'
 // REMARQUE : les ensembles vides sont types contrairement a l'ensemble vide des mathematiques
-func new_ens_t(t reflect.Type) *ens_t {
+func new_ens_t(ind bool, t reflect.Type) *ens_t {
 	var m reflect.Value
 	var msi map[string]int
-	ind := !t.Comparable() || reflect.Ptr == t.Kind() // indicateur d'indirection
 	if ind {                                          // en cas d'indirection
 		msi = make(map[string]int)
 		m = reflect.MakeMap(reflect.MapOf(reflect.TypeOf(0), t))
@@ -198,14 +197,18 @@ func new_ens_t(t reflect.Type) *ens_t {
 	e := ens_t{t: t, ind: ind, m: m, msi: msi}
 	return &e
 }
-
 // la fonction 'ajouter' permet d'ajouter un element a l'ensemble
-func (pe *ens_t) ajouter(v reflect.Value) *ens_t {
-	if pe.t.Kind() != v.Kind() {
+func (pe *ens_t) ajouter(i interface{}) *ens_t {
+	if nil == i {
 		panic("ajouter")
 	}
+	v := reflect.ValueOf(i)
+	if !v.Type().ConvertibleTo(pe.t) {
+		panic(fmt.Sprintf("ajouter : pe.t=%v v=%v",pe.t.Kind(), v.Kind()))
+	}
+	v = v.Convert(pe.t)
 	if pe.ind {
-		k := ident(v.Interface())
+		k := ident(i)
 		if _, ok := pe.msi[k]; !ok {
 			ki := pe.m.Len() // nouvel index
 			pe.m.SetMapIndex(reflect.ValueOf(ki), v)
@@ -222,7 +225,7 @@ func (pe *ens_t) ajouter(v reflect.Value) *ens_t {
 //            car une liste d'interfaces n'est pas une interface liste
 func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
 	for i := 0; i < vl.Len(); i++ {
-		pe.ajouter(vl.Index(i))
+		pe.ajouter(vl.Index(i).Interface())
 	}
 	return pe
 }
@@ -230,10 +233,10 @@ func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
 // la fonction 'copier' permet de "cloner" une ensemble
 // REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
 func (pe *ens_t) copier() *ens_t {
-	px := new_ens_t(pe.t)
+	px := new_ens_t(pe.ind,pe.t)
 	vl := reflect.ValueOf(pe.lister())
 	for i := 0; i < vl.Len(); i++ {
-		elmt := vl.Index(i)
+		elmt := vl.Index(i).Interface()
 		px.ajouter(elmt)
 	}
 	return px
@@ -258,6 +261,9 @@ func (pe *ens_t) retirer(v reflect.Value) *ens_t {
 
 // la fonction 'lister' permet de lister les elements de l'ensemble (dans un ordre deterministe)
 func (pe *ens_t) lister() interface{} {
+	if nil == pe {
+		return nil
+	}
 	if pe.ind {
 		li := lister_cles(pe.m.Interface()).([]int)
 		tik := pe.m.Type().Elem()
@@ -275,7 +281,7 @@ func (pe *ens_t) lister() interface{} {
 // la fonction 'contient' permet de verifier si l'element 'v' appartient a l'ensemble
 func (pe *ens_t) contient(v reflect.Value) bool {
 	if nil == pe {
-		panic("contient")
+		return false
 	}
 	if pe.t.Kind() != v.Kind() {
 		return false
@@ -290,6 +296,21 @@ func (pe *ens_t) contient(v reflect.Value) bool {
 	}
 }
 
+// la fonction 'nombre' retourne le nombre d'elements (cardinal) de l'enmbme l'ensemble
+func (pe *ens_t) nombre() int {
+	if nil == pe {
+		return 0
+	}
+	return pe.m.Len()
+}
+
+// la fonction 'vide' retourne 'true' si l'ensemble est vide ou 'nil' et 'false' sinon
+func (pe *ens_t) vide() bool {
+	if nil == pe {
+		return true
+	}
+	return 0 == pe.m.Len()
+}
 // la fonction 'egal' permet de verifier l'egalite de l'ensemble 'px' et de l'ensemble 'pe'
 // REMARQUE : reflect.DeepEqual(pe,px) ne donne pas le resultat voulu
 func (pe *ens_t) egal(px *ens_t) bool {
@@ -354,7 +375,7 @@ func (pe *ens_t) unir(px *ens_t) *ens_t {
 			elmt = px.m.MapIndex(elmt)
 		}
 		if !pe.contient(elmt) {
-			pe.ajouter(elmt)
+			pe.ajouter(elmt.Interface())
 		}
 	}
 	return pe
@@ -432,7 +453,10 @@ func Creer(i interface{}) *ens_t {
 		panic("Creer")
 	}
 	t := vi.Type().Elem()
-	e := new_ens_t(t).ajouter_liste(vi)
+	ind := !t.Comparable() ||
+		reflect.Ptr == t.Kind() ||
+		reflect.Interface == t.Kind() // indicateur d'indirection
+	e := new_ens_t(ind,t).ajouter_liste(vi)
 	return e
 }
 
@@ -442,7 +466,7 @@ func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
 		panic("Ajouter")
 	}
 	for _, i := range li {
-		pe.ajouter(reflect.ValueOf(i))
+		pe.ajouter(reflect.ValueOf(i).Interface())
 	}
 	return pe
 }
@@ -463,9 +487,6 @@ func (pe *ens_t) Retirer(li ...interface{}) Ensemble {
 
 // la fonction 'Lister' permet de lister les elements de l'ensemble dans un ordre deterministe
 func (pe *ens_t) Lister() interface{} {
-	if nil == pe {
-		panic("Lister")
-	}
 	return pe.lister()
 }
 
@@ -476,25 +497,16 @@ func (pe *ens_t) Contient(i interface{}) bool {
 
 // la fonction 'Nombre' retourne le nombre d'elements (cardinal) de l'enmbme l'ensemble
 func (pe *ens_t) Nombre() int {
-	if nil == pe {
-		return 0
-	}
-	return pe.m.Len()
+	return pe.nombre()
 }
 
 // la fonction 'Vide' retourne 'true' si l'ensemble est vide ou 'nil' et 'false' sinon
 func (pe *ens_t) Vide() bool {
-	if nil == pe {
-		return true
-	}
-	return 0 == pe.m.Len()
+	return pe.vide()
 }
 
 // la fonction 'Egal' permet de verifier l'egalite de l'Ensemble 'x' et de l'ensemble 'pe'
 func (pe *ens_t) Egal(x Ensemble) bool {
-	if nil == pe {
-		panic("Egal")
-	}
 	px := conv(x)
 	return pe.egal(px)
 }
@@ -668,7 +680,7 @@ func Intersection(lpe ...Ensemble) Ensemble {
 }
 
 // la fonction 'Union' retourne l'ensemble des elements de tous les ensembles de la liste de parametres
-func Union(lpe ...Ensemble) *ens_t {
+func Union(lpe ...Ensemble) Ensemble {
 	lpx := make([]*ens_t, len(lpe))
 	for i, x := range lpe {
 		px := conv(x)
@@ -678,7 +690,7 @@ func Union(lpe ...Ensemble) *ens_t {
 }
 
 // la fonction 'Soustraction' retourne l'ensemble des elements de py qui n'appartiennent a aucun des ensembles de la liste 'lpx'
-func Soustraction(y Ensemble, lpe ...Ensemble) *ens_t {
+func Soustraction(y Ensemble, lpe ...Ensemble) Ensemble {
 	py := conv(y)
 	lpx := make([]*ens_t, len(lpe))
 	for i, x := range lpe {
