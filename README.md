@@ -1,4 +1,4 @@
-# Exemples d'utilisation du langage **Go** de *Google*
+# Exemples d'utilisation du langage **Go** (version 1.8 minimum) de *Google*
 
 Le point de départ de ces **exemples** est le besoin de récupération de la liste des clés d'une *'map'* quel que soit sont type.
 
