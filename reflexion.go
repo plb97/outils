@@ -220,14 +220,19 @@ func (pe *ens_t) ajouter(i interface{}) *ens_t {
 	return pe
 }
 
-// la fonction 'ajouter_liste' permet d'ajouter tous les elements d'une liste a l'ensemble
-// REMARQUE : la fonction 'ajouter' pourrait etre rendue "elliptique" mais cela ne serait pas equivalent
-//            car une liste d'interfaces n'est pas une interface liste
-func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
-	for i := 0; i < vl.Len(); i++ {
-		pe.ajouter(vl.Index(i).Interface())
+// la fonction 'creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
+// representee par l'interface passee en parametre
+func creer(i interface{}) *ens_t {
+	vi := reflect.ValueOf(i)
+	if reflect.Slice != vi.Kind() {
+		panic("creer")
 	}
-	return pe
+	t := vi.Type().Elem()
+	ind := !t.Comparable() ||
+		reflect.Ptr == t.Kind() ||
+		reflect.Interface == t.Kind() // indicateur d'indirection
+	e := new_ens_t(ind,t).ajouter_liste(vi)
+	return e
 }
 
 // la fonction 'copier' permet de "cloner" un ensemble
@@ -240,6 +245,16 @@ func (pe *ens_t) copier() *ens_t {
 		px.ajouter(elmt)
 	}
 	return px
+}
+
+// la fonction 'ajouter_liste' permet d'ajouter tous les elements d'une liste a l'ensemble
+// REMARQUE : la fonction 'ajouter' pourrait etre rendue "elliptique" mais cela ne serait pas equivalent
+//            car une liste d'interfaces n'est pas une interface liste
+func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
+	for i := 0; i < vl.Len(); i++ {
+		pe.ajouter(vl.Index(i).Interface())
+	}
+	return pe
 }
 
 // la fonction 'retirer' permet de retirer un element de l'ensemble
@@ -437,21 +452,6 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 		}
 	}
 	return pe
-}
-
-// la fonction 'creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
-// representee par l'interface passee en parametre
-func creer(i interface{}) *ens_t {
-	vi := reflect.ValueOf(i)
-	if reflect.Slice != vi.Kind() {
-		panic("creer")
-	}
-	t := vi.Type().Elem()
-	ind := !t.Comparable() ||
-		reflect.Ptr == t.Kind() ||
-		reflect.Interface == t.Kind() // indicateur d'indirection
-	e := new_ens_t(ind,t).ajouter_liste(vi)
-	return e
 }
 
 // la fonction 'Creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
