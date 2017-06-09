@@ -31,6 +31,7 @@ Les actions suivantes peuvent s'effecteur sur un *'Ensemble'* :
 
 **Methode** | Commentaire
 ----------- | -----------
+**Copier**() Ensemble | cloner l'ensemble
 **Ajouter**(le ...interface{}) Ensemble | ajouter les éléments passés en paramètre à l'ensemble
 **Retirer**(le ...interface{}) Ensemble | retirer les éléments passés en paramètre à l'ensemble
 **Lister**() interface{} | lister les éléments de l'ensemble dans un ordre déterministe (croissant si possible)
