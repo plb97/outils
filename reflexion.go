@@ -9,22 +9,25 @@ import (
 
 // la fonction 'lister_cles' relourne la liste des cles d'une 'map' quelconque
 // si cela est possible les cles sont triees par ordre croissant
+// ATTENTION : 'lister_cles' n'est pas sure dans un contexte reparti ou parallele (multi threads/task)
 func lister_cles(i interface{}) interface{} {
 	// controles
 	if nil == i {
 		return nil
 	}
-	ti := reflect.TypeOf(i) // recuperer le 'type' du parametre
+	vi := reflect.ValueOf(i)                                   // recuperer la 'value' du parametre
+	ti := vi.Type()                                            // recuperer le 'type' du parametre
+	//ti := reflect.TypeOf(i)                                    // recuperer le 'type' du parametre
 	if reflect.Map != ti.Kind() {
 		panic("lister_cles : le parametre n'est pas de type 'map'")
 	}
-	tik := ti.Key() // recuperer le 'type' des cles de la table ('map')
-
 	// collecte des cles
-	vi := reflect.ValueOf(i)                                   // recuperer la 'value' du parametre
+	// REMARQUE preliminaire : une liste de valeurs ([]Value) n'est pas identique a une valeur liste (Value([]...))
+	tik := ti.Key()                                            // recuperer le 'type' des cles de la table ('map')
+	// REMARQUE : 'lk' est utilisee dans la 'closure' 'test' plus bas
 	lk := reflect.MakeSlice(reflect.SliceOf(tik), 0, vi.Len()) // creer la liste des cles a retourner (Value)
-	lmk := vi.MapKeys()                                        // liste des cles ([]Value)
-	for _, k := range lmk {                                    // transformer 'lmk' de type '[]Value' en 'lk' de type 'Value'
+	lmk := vi.MapKeys()                                        // recuperer la liste des cles ([]Value)
+	for _, k := range lmk {                                    // transformer 'lmk' ([]Value) en 'lk' (Value)
 		lk = reflect.Append(lk, k)
 	}
 
@@ -45,6 +48,7 @@ func lister_cles(i interface{}) interface{} {
 	compFloat64 := func(ki, kj interface{}) bool { return ki.(float64) < kj.(float64) }
 	// 'closure' retournant la fonction de comparaison utilisee lors de l'appel a 'sort.SliceStable'
 	less := func(comp func(ki, kj interface{}) bool) func(i, j int) bool {
+		// REMARQUE : 'lk' est declaree plus haut
 		return func(i, j int) bool {
 			ki := lk.Index(i).Interface() // cle 'i'
 			kj := lk.Index(j).Interface() // cle 'j'
@@ -53,7 +57,7 @@ func lister_cles(i interface{}) interface{} {
 	}
 
 	lki := lk.Interface() // 'interface' representant la liste des cles
-	switch reflect.TypeOf(lki).Elem().Kind() {
+	switch tik.Kind() {
 	//// cas standards prevus dans le package 'sort'
 	//case reflect.String:  sort.Strings(lki.([]string));
 	//case reflect.Int:     sort.Ints(lki.([]int))
@@ -135,6 +139,14 @@ func Renverser(i interface{}) {
 	}
 }
 
+// 'ens_t' est une structure concrete pour les ensembles
+type ens_t struct {
+	t   reflect.Type   // type des elements
+	ind bool           // indicateur d'indirection
+	m   reflect.Value  // table ('map') representant l'ensemble
+	msi map[string]int // table de correspondance id -> index (utilisee lorsqu'il y a indirection)
+}
+
 var nul = &ens_t{t: reflect.TypeOf(nil)}
 var nulle = reflect.Value{}
 
@@ -142,45 +154,6 @@ var nulle = reflect.Value{}
 // REMARQUE : peut etre amelioree...
 func ident(i interface{}) string {
 	return fmt.Sprintf("%T:%v", i, i)
-}
-
-// la fonction 'conv' convertit le parametre 'x' en pointeur *ens_t
-func conv(x Ensemble) *ens_t {
-	if nil == x {
-		return nul
-	}
-	px, ok := x.(*ens_t)
-	if !ok {
-		panic("conv")
-	}
-	return px
-}
-
-// 'Ensemble' represente un ensemble d'elements de meme type
-// sur lesquels (les ensembles) peuvent s'effectuer des operations
-type Ensemble interface {
-	Ajouter(le ...interface{}) Ensemble
-	Retirer(le ...interface{}) Ensemble
-	Lister() interface{}
-	Contient(i interface{}) bool
-	Nombre() int
-	Vide() bool
-	Copier() Ensemble
-	Egal(x Ensemble) bool
-	Unir(x Ensemble) Ensemble       // comparable a Ajouter
-	Soustraire(x Ensemble) Ensemble // comparable a Retirer
-	Intersecter(x Ensemble) Ensemble
-	Appeler(i interface{}) interface{}
-
-	String() string
-}
-
-// 'ens_t' est une structure concrete pour les ensembles
-type ens_t struct {
-	t   reflect.Type   // type des elements
-	ind bool           // indicateur d'indirection
-	m   reflect.Value  // table ('map') representant l'ensemble
-	msi map[string]int // table de correspondance id -> index (utilisee lorsqu'il y a indirection)
 }
 
 // la fonction new_ens_t' retourne un pointeur '*ens_t' sur un ensemble vide
@@ -454,92 +427,8 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 	}
 	return pe
 }
-
-// la fonction 'Creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
-// representee par l'interface passee en parametre
-func Creer(i interface{}) Ensemble {
-	return creer(i)
-}
-
-// la fonction 'Copier' permet de "cloner" un ensemble
-// REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
-func (pe *ens_t) Copier() Ensemble {
-	if nil == pe {
-		panic("Copier")
-	}
-	return pe.copier()
-}
-// la fonction 'Ajouter' permet d'ajouter des elements a l'ensemble
-func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
-	if nil == pe {
-		panic("Ajouter")
-	}
-	for _, i := range li {
-		pe.ajouter(reflect.ValueOf(i).Interface())
-	}
-	return pe
-}
-
-// la fonction 'Retirer' permet de retirer des elements de l'ensemble
-func (pe *ens_t) Retirer(li ...interface{}) Ensemble {
-	if nil == pe {
-		panic("Retirer")
-	}
-	for _, i := range li {
-		pe.retirer(reflect.ValueOf(i))
-		if 0 == pe.m.Len() {
-			break // iuntile de continuer
-		}
-	}
-	return pe
-}
-
-// la fonction 'Lister' permet de lister les elements de l'ensemble dans un ordre deterministe
-func (pe *ens_t) Lister() interface{} {
-	return pe.lister()
-}
-
-// la fonction 'Contient' permet de verifier si l'element 'i' appartient a l'ensemble
-func (pe *ens_t) Contient(i interface{}) bool {
-	return pe.contient(reflect.ValueOf(i))
-}
-
-// la fonction 'Nombre' retourne le nombre d'elements (cardinal) de l'enmbme l'ensemble
-func (pe *ens_t) Nombre() int {
-	return pe.nombre()
-}
-
-// la fonction 'Vide' retourne 'true' si l'ensemble est vide ou 'nil' et 'false' sinon
-func (pe *ens_t) Vide() bool {
-	return pe.vide()
-}
-
-// la fonction 'Egal' permet de verifier l'egalite de l'Ensemble 'x' et de l'ensemble 'pe'
-func (pe *ens_t) Egal(x Ensemble) bool {
-	px := conv(x)
-	return pe.egal(px)
-}
-
-// la fonction 'Unir' permet d'ajouter les elements de l'ensemble 'x' a l'ensemble 'pe'
-func (pe *ens_t) Unir(x Ensemble) Ensemble {
-	px := conv(x)
-	return pe.unir(px)
-}
-
-// la fonction 'Intersecter' permet de retirer les elements de l'ensemble 'pe' qui n'appartienent pas a l'ensemble 'x'
-func (pe *ens_t) Intersecter(x Ensemble) Ensemble {
-	px := conv(x)
-	return pe.intersecter(px)
-}
-
-// la fonction 'Soustraire' permet de retirer les elements de l'ensemble 'pe' qui appartienent aussi a l'ensemble 'x'
-func (pe *ens_t) Soustraire(x Ensemble) Ensemble {
-	px := conv(x)
-	return pe.soustraire(px)
-}
-
-// la fonction 'Appeler' permet pour chaque element de l'ensemble d'appeler la fonction representee par 'i'
-func (pe *ens_t) Appeler(i interface{}) interface{} {
+// la fonction 'appeler' permet pour chaque element de l'ensemble d'appeler la fonction representee par 'i'
+func (pe *ens_t) appeler(i interface{}) interface{} {
 	if nil == pe || nil == i {
 		panic("Appliquer")
 	}
@@ -595,29 +484,6 @@ func (pe *ens_t) Appeler(i interface{}) interface{} {
 		}
 		return ls.Interface()
 	}
-}
-
-// la fonction 'String' retourne une chaine representant l'ensemble
-func (pe *ens_t) String() string {
-	if nil == pe {
-		return "<nil>"
-	}
-	lk := pe.Lister()
-	str := fmt.Sprintf("%v", lk)
-	return str
-}
-
-// la fonction 'texte' retourne une chaine representant l'ensemble y compris 't' et 'ind'
-func (pe *ens_t) texte() string {
-	if nil == pe {
-		return "<nil>"
-	}
-	str := "["
-	str += fmt.Sprintf("t=%v ind=%v ", pe.t, pe.ind)
-	lk := pe.Lister()
-	str += fmt.Sprintf("%v", lk)
-	str += "]"
-	return str
 }
 
 // la fonction 'intersection' retourne l'ensemble des elements communs a tous les ensembles de la liste de parametres
@@ -676,6 +542,179 @@ func soustraction(py *ens_t, lpx ...*ens_t) *ens_t {
 		pe.soustraire(px)
 	}
 	return pe
+}
+
+// la fonction 'texte' retourne une chaine representant l'ensemble y compris 't' et 'ind'
+func (pe *ens_t) texte() string {
+	if nil == pe {
+		return "<nil>"
+	}
+	str := "["
+	str += fmt.Sprintf("t=%v ind=%v ", pe.t, pe.ind)
+	lk := pe.Lister()
+	str += fmt.Sprintf("%v", lk)
+	str += "]"
+	return str
+}
+// la fonction 'String' retourne une chaine representant l'ensemble
+func (pe *ens_t) String() string {
+	if nil == pe {
+		return "<nil>"
+	}
+	lk := pe.Lister()
+	str := fmt.Sprintf("%v", lk)
+	return str
+}
+
+
+// l'interface 'Ensemble' represente un ensemble d'elements de meme type
+// sur lesquels (les ensembles) peuvent s'effectuer des operations
+type Ensemble interface {
+	Ajouter(le ...interface{}) Ensemble
+	Retirer(le ...interface{}) Ensemble
+	Lister() interface{}
+	Contient(i interface{}) bool
+	Nombre() int
+	Vide() bool
+	Copier() Ensemble
+	Egal(x Ensemble) bool
+	Unir(x Ensemble) Ensemble       // comparable a Ajouter
+	Soustraire(x Ensemble) Ensemble // comparable a Retirer
+	Intersecter(x Ensemble) Ensemble
+	Appeler(i interface{}) interface{}
+
+	String() string
+}
+
+// la fonction 'conv' convertit le parametre 'x' en pointeur *ens_t
+// REMARQUE : ce package 'outils' n'est pas prevu pour supporter d'autres implantation de l'interface 'Ensemble'
+func conv(x Ensemble) *ens_t {
+	if nil == x {
+		return nul
+	}
+	px, ok := x.(*ens_t)
+	if !ok {
+		panic("conv")
+	}
+	return px
+}
+
+// la fonction 'Creer' permet de creer un ensemble dont le type correspond a la liste (eventuellemnt vide)
+// representee par l'interface passee en parametre
+func Creer(i interface{}) Ensemble {
+	if nil == i {
+		panic("Creer")
+	}
+	return creer(i)
+}
+
+// la fonction 'Copier' permet de "cloner" un ensemble
+// REMARQUE : les deux ensembles sont egaux mais ils ne sont pas le meme (les pointeurs *ens_t sont differents)
+func (pe *ens_t) Copier() Ensemble {
+	if nil == pe {
+		panic("Copier")
+	}
+	return pe.copier()
+}
+// la fonction 'Ajouter' permet d'ajouter des elements a l'ensemble
+func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
+	if nil == pe {
+		panic("Ajouter")
+	}
+	for _, i := range li {
+		pe.ajouter(reflect.ValueOf(i).Interface())
+	}
+	return pe
+}
+
+// la fonction 'Retirer' permet de retirer des elements de l'ensemble
+func (pe *ens_t) Retirer(li ...interface{}) Ensemble {
+	if nil == pe {
+		panic("Retirer")
+	}
+	for _, i := range li {
+		pe.retirer(reflect.ValueOf(i))
+		if 0 == pe.m.Len() {
+			break // iuntile de continuer
+		}
+	}
+	return pe
+}
+
+// la fonction 'Lister' permet de lister les elements de l'ensemble dans un ordre deterministe
+func (pe *ens_t) Lister() interface{} {
+	if nil == pe {
+		panic("Lister")
+	}
+	return pe.lister()
+}
+
+// la fonction 'Contient' permet de verifier si l'element 'i' appartient a l'ensemble
+func (pe *ens_t) Contient(i interface{}) bool {
+	if nil == pe {
+		panic("Contient")
+	}
+	return pe.contient(reflect.ValueOf(i))
+}
+
+// la fonction 'Nombre' retourne le nombre d'elements (cardinal) de l'enmbme l'ensemble
+func (pe *ens_t) Nombre() int {
+	if nil == pe {
+		panic("Nombre")
+	}
+	return pe.nombre()
+}
+
+// la fonction 'Vide' retourne 'true' si l'ensemble est vide ou 'nil' et 'false' sinon
+func (pe *ens_t) Vide() bool {
+	if nil == pe {
+		panic("Vide")
+	}
+	return pe.vide()
+}
+
+// la fonction 'Egal' permet de verifier l'egalite de l'Ensemble 'x' et de l'ensemble 'pe'
+func (pe *ens_t) Egal(x Ensemble) bool {
+	if nil == pe {
+		panic("Egal")
+	}
+	px := conv(x)
+	return pe.egal(px)
+}
+
+// la fonction 'Unir' permet d'ajouter les elements de l'ensemble 'x' a l'ensemble 'pe'
+func (pe *ens_t) Unir(x Ensemble) Ensemble {
+	if nil == pe {
+		panic("Unir")
+	}
+	px := conv(x)
+	return pe.unir(px)
+}
+
+// la fonction 'Intersecter' permet de retirer les elements de l'ensemble 'pe' qui n'appartienent pas a l'ensemble 'x'
+func (pe *ens_t) Intersecter(x Ensemble) Ensemble {
+	if nil == pe {
+		panic("Intersecter")
+	}
+	px := conv(x)
+	return pe.intersecter(px)
+}
+
+// la fonction 'Soustraire' permet de retirer les elements de l'ensemble 'pe' qui appartienent aussi a l'ensemble 'x'
+func (pe *ens_t) Soustraire(x Ensemble) Ensemble {
+	if nil == pe {
+		panic("Soustraire")
+	}
+	px := conv(x)
+	return pe.soustraire(px)
+}
+
+// la fonction 'Appeler' permet pour chaque element de l'ensemble d'appeler la fonction representee par 'i'
+func (pe *ens_t) Appeler(i interface{}) interface{} {
+	if nil == pe {
+		panic("Appeler")
+	}
+	return pe.appeler(i)
 }
 
 // la fonction 'Intersection' retourne l'ensemble des elements communs a tous les ensembles de la liste de parametres
