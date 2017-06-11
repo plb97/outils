@@ -448,7 +448,7 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 		panic("Appliquer")
 	}
 	ti := tf.In(0)
-	if ti.Kind() != pe.t.Kind() {
+	if !pe.t.ConvertibleTo(ti) {
 		panic("Appliquer")
 	}
 	ns := tf.NumOut()
@@ -469,14 +469,16 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 	switch ns {
 	case 0:
 		for i := 0; i < lx.Len(); i++ {
-			in := reflect.ValueOf(lx.Index(i).Interface())
+			vi := lx.Index(i).Convert(ti)
+			in := reflect.ValueOf(vi.Interface())
 			vf.Call([]reflect.Value{in})
 		}
 		return nil
 	case 1:
 		ls := reflect.MakeSlice(reflect.SliceOf(ts), 0, lx.Len())
 		for i := 0; i < lx.Len(); i++ {
-			in := reflect.ValueOf(lx.Index(i).Interface())
+			vi := lx.Index(i).Convert(ti)
+			in := reflect.ValueOf(vi.Interface())
 			out := vf.Call([]reflect.Value{in})[0]
 			ls = reflect.Append(ls, out)
 		}
@@ -484,7 +486,8 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 	default:
 		ls := reflect.MakeSlice(reflect.SliceOf(ts), 0, lx.Len())
 		for i := 0; i < lx.Len(); i++ {
-			in := reflect.ValueOf(lx.Index(i).Interface())
+			vi := lx.Index(i).Convert(ti)
+			in := reflect.ValueOf(vi.Interface())
 			out := vf.Call([]reflect.Value{in})
 			vst := reflect.Indirect(reflect.New(ts))
 			for j := range out {
