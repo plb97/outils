@@ -87,6 +87,16 @@ func TestEnsInt(t *testing.T) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
 		}
 	}
+	{ // egal
+		attendu := ei21
+		obtenu := ei21.copier()
+		if attendu == obtenu { // pointeurs differents
+			t.Errorf(test+": attendu %p == obtenu %p\n", ei12, obtenu)
+		}
+		if !attendu.egal(obtenu) { // ensembles egaux
+			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
+		}
+	}
 	{ // pas egal
 		attendu := ei12
 		obtenu := ei23
@@ -382,6 +392,16 @@ func TestEnsembleInt(t *testing.T) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
 		}
 	}
+	{ // egal
+		attendu := ei21
+		obtenu := ei21.Copier()
+		if attendu == obtenu { // pointeurs differents
+			t.Errorf(test+": attendu %p == obtenu %p\n", ei12, obtenu)
+		}
+		if !attendu.Egal(obtenu) { // ensembles egaux
+			t.Errorf(test+": attendu %v != obtenu %v\n", true, false)
+		}
+	}
 	{ // pas egal
 		attendu := ei12
 		obtenu := ei23
@@ -613,3 +633,83 @@ func TestEnsembleIntInd(t *testing.T) {
 	}
 }
 
+func TestListe(t *testing.T) {
+	test := "TestListe"
+	fmt.Println(test)
+
+	var (
+		mis = map[int]string{4:"quatre",2:"deux",3:"trois",1:"un",}
+		li = []int{2,4,3,1,} // pas ordonnee (ordre alphabetique)
+		msi = map[string]int{"deux":2,"quatre":4,"trois":3,"un":1,}
+		ls = []string{"un","deux","trois","quatre"} // pas ordonnee (ordre numerique)
+		mfs = map[float64]string{4:"quatre",2:"deux",3:"trois",1:"un",}
+		lf = []float64{2,4,3,1,} // pas ordonnee (ordre alphabetique)
+	)
+
+	{ // liste 'int'
+		attendu := make([]int,len(li))
+		copy(attendu,li)
+		obtenu := Lister_cles(mis).([]int) // ordonnee
+		if reflect.DeepEqual(attendu, obtenu) { // attendu pas triee
+			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+		}
+		sort.Ints(attendu)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		obtenu = Lister_cles_int(mis)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		for i, k := range obtenu {
+			if mis[k] != ls[i] {
+				t.Errorf(test+": attendu %v != obtenu %v\n", ls[i], mis[k])
+			}
+		}
+	}
+
+	{ // liste 'string'
+		attendu := make([]string,len(ls))
+		copy(attendu,ls)
+		obtenu := Lister_cles(msi).([]string) // ordonnee
+		if reflect.DeepEqual(attendu, obtenu) { // attendu pas triee
+			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+		}
+		sort.Strings(attendu)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		obtenu = Lister_cles_string(msi)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		for i, k := range obtenu {
+			if msi[k] != li[i] {
+				t.Errorf(test+": attendu %v != obtenu %v\n", ls[i], msi[k])
+			}
+		}
+	}
+
+	{ // liste 'float64'
+		attendu := make([]float64,len(lf))
+		copy(attendu,lf)
+		obtenu := Lister_cles(mfs).([]float64) // ordonnee
+		if reflect.DeepEqual(attendu, obtenu) { // attendu pas triee
+			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
+		}
+		sort.Float64s(attendu)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		obtenu = Lister_cles_float64(mfs)
+		if !reflect.DeepEqual(attendu, obtenu) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		}
+		for i, k := range obtenu {
+			if mfs[k] != ls[i] {
+				t.Errorf(test+": attendu %v != obtenu %v\n", ls[i], mfs[k])
+			}
+		}
+	}
+
+}
