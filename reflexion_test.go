@@ -2,7 +2,7 @@
 // All rights reserved.
 // Use of this source code is governed by a CeCILL-B_V1
 // (BSD-style) license that can be found in the
-// LICENSE (French) or LICENSE_EN (English) file.
+// LICENSE.md (French) or LICENSE_EN.md (English) file.
 package outils
 
 import (
