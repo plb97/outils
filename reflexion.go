@@ -9,7 +9,7 @@ import (
 
 // la fonction 'lister_cles' relourne la liste des cles d'une 'map' quelconque
 // si cela est possible les cles sont triees par ordre croissant
-// ATTENTION : 'lister_cles' n'est pas sure dans un contexte reparti ou parallele (multi threads/task)
+// ATTENTION : 'lister_cles' n'est pas sure dans un contexte d'execution en parallele (multi threads/task)
 func lister_cles(i interface{}) interface{} {
 	// controles
 	if nil == i {
