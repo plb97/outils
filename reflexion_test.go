@@ -554,8 +554,8 @@ func TestEnsPanic(t *testing.T) {
 
 // Ensemble
 
-func TestEnsembleInt(t *testing.T) {
-	test := "TestEnsembleInt"
+func TestEnsemble(t *testing.T) {
+	test := "TestEnsemble"
 	fmt.Println(test)
 	var (
 		ei12    = Creer(li12)
@@ -758,8 +758,8 @@ func TestEnsembleInt(t *testing.T) {
 	}
 }
 
-func TestEnsembleIntInd(t *testing.T) {
-	test := "TestEnsembleIntInd"
+func TestEnsembleInd(t *testing.T) {
+	test := "TestEnsembleInd"
 	fmt.Println(test)
 	var (
 		ei12    = Creer(li12)
