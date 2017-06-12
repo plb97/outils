@@ -45,4 +45,5 @@ Les actions suivantes peuvent s'effecteur sur un *'Ensemble'* :
 **Appeler**(i interface{}) interface{} | appeler la fonction passée en paramètre pour chaque élément de l'ensemble
 
 ## Tests
-Des tests de ce package se trouvent dans *'reflexion_test.go'* qui donne des exemples d'utilisation courante ainsi que des cas d'erreurs avec appel de la fonction *'panic'*.
+Des tests de ce package se trouvent dans *'reflexion_test.go'*.
+Il donne des exemples d'utilisation courante ainsi que des cas de test du mode *'panic'*.

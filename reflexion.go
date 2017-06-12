@@ -752,30 +752,32 @@ func (pe *ens_t) Appeler(i interface{}) interface{} {
 
 // la fonction 'Intersection' retourne l'ensemble des elements communs a tous les 'Ensembles' passes parametre
 func Intersection(lpe ...Ensemble) Ensemble {
+	if 0 == len(lpe) {
+		panic("Intersection")
+	}
 	lpx := make([]*ens_t, 0)
 	for _, x := range lpe {
-		if nil != x  {
-			px := conv(x)
-			lpx = append(lpx,px)
+		if nil == x  {
+			panic("Intersection")
 		}
-	}
-	if 0 == len(lpx) {
-		panic("Intersection")
+		px := conv(x)
+		lpx = append(lpx,px)
 	}
 	return intersection(lpx...)
 }
 
 // la fonction 'Union' retourne l'ensemble des elements de tous les 'Ensembles' passes en parametre
 func Union(lpe ...Ensemble) Ensemble {
+	if 0 == len(lpe) {
+		panic("Union")
+	}
 	lpx := make([]*ens_t, 0)
 	for _, x := range lpe {
-		if nil != x  {
-			px := conv(x)
-			lpx = append(lpx,px)
+		if nil == x  {
+			panic("Union")
 		}
-	}
-	if 0 == len(lpx) {
-		panic("Union")
+		px := conv(x)
+		lpx = append(lpx,px)
 	}
 	return union(lpx...)
 }
@@ -788,10 +790,11 @@ func Soustraction(y Ensemble, lpe ...Ensemble) Ensemble {
 	py := conv(y)
 	lpx := make([]*ens_t, 0)
 	for _, x := range lpe {
-		if nil != x  {
-			px := conv(x)
-			lpx = append(lpx,px)
+		if nil == x {
+			panic("Soustraction")
 		}
+		px := conv(x)
+		lpx = append(lpx,px)
 	}
 	return soustraction(py, lpx...)
 }

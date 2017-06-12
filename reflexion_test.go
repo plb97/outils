@@ -6,7 +6,6 @@
 package outils
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -15,8 +14,7 @@ import (
 
 func TestListe(t *testing.T) {
 	test := "TestListe"
-	fmt.Println(test)
-
+	//println(test)
 	var (
 		mis = map[int]string{4:"quatre",2:"deux",3:"trois",1:"un",}
 		li = []int{2,4,3,1,} // pas ordonnee (ordre alphabetique)
@@ -25,7 +23,6 @@ func TestListe(t *testing.T) {
 		mfs = map[float64]string{4:"quatre",2:"deux",3:"trois",1:"un",}
 		lf = []float64{2,4,3,1,} // pas ordonnee (ordre alphabetique)
 	)
-
 	{ // liste 'int'
 		attendu := make([]int,len(li))
 		copy(attendu,li)
@@ -113,7 +110,7 @@ var (
 
 func TestEns(t *testing.T) {
 	test := "TestEns"
-	fmt.Println(test)
+	//println(test)
 	var (
 		ei12   = creer(li12)
 		ei21   = creer(li21)
@@ -316,7 +313,7 @@ func TestEns(t *testing.T) {
 
 func TestEnsInd(t *testing.T) {
 	test := "TestEnsInd"
-	fmt.Println(test)
+	//println(test)
 	var (
 		ei12   = creer(li12)
 		ei21   = creer(li21)
@@ -425,7 +422,7 @@ func TestEnsInd(t *testing.T) {
 
 func TestEnsPanic(t *testing.T) {
 	test := "TestEnsPanic"
-	fmt.Println(test)
+	//println(test)
 	func() {
 		ctr := 0
 		defer func() {
@@ -660,7 +657,7 @@ func TestEnsPanic(t *testing.T) {
 
 func TestEnsemble(t *testing.T) {
 	test := "TestEnsemble"
-	fmt.Println(test)
+	//println(test)
 	var (
 		ei12    = Creer(li12)
 		ei21    = Creer(li21)
@@ -811,13 +808,6 @@ func TestEnsemble(t *testing.T) {
 	}
 	{ // soustraction
 		attendu := ei12
-		obtenu := Soustraction(ei12, nil)
-		if !attendu.Egal(obtenu) { // ensembles pas egaux
-			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
-		}
-	}
-	{ // soustraction
-		attendu := ei12
 		obtenu := Soustraction(ei21, ei34)
 		if !attendu.Egal(obtenu) { // ensembles pas egaux
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
@@ -864,7 +854,7 @@ func TestEnsemble(t *testing.T) {
 
 func TestEnsembleInd(t *testing.T) {
 	test := "TestEnsembleInd"
-	fmt.Println(test)
+	//println(test)
 	var (
 		ei12    = Creer(li12)
 		ei21    = Creer(li21)
@@ -973,10 +963,12 @@ func TestEnsembleInd(t *testing.T) {
 
 func TestEnsemblePanic(t *testing.T) {
 	test := "TestEnsemblePanic"
-	fmt.Println(test)
+	//println(test)
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Creer"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -988,10 +980,15 @@ func TestEnsemblePanic(t *testing.T) {
 			}
 		}()
 		Creer(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Egal"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1004,10 +1001,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Egal(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Contient"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1020,10 +1022,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Contient(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Ajouter"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1036,10 +1043,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Ajouter(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Retirer"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1052,10 +1064,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Retirer(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Unir"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1068,10 +1085,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Unir(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Intersecter"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1084,10 +1106,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Intersecter(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Soustraire"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1100,10 +1127,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Soustraire(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Appeler"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1116,10 +1148,15 @@ func TestEnsemblePanic(t *testing.T) {
 		}()
 		ei12    := Creer(li12)
 		ei12.Appeler(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Intersection"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1131,10 +1168,15 @@ func TestEnsemblePanic(t *testing.T) {
 			}
 		}()
 		Intersection(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Union"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1146,10 +1188,15 @@ func TestEnsemblePanic(t *testing.T) {
 			}
 		}()
 		Union(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "Soustraction"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -1161,6 +1208,30 @@ func TestEnsemblePanic(t *testing.T) {
 			}
 		}()
 		Soustraction(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
+	}()
+	func() {
+		ctr := 0
+		defer func() {
+			if r := recover(); r != nil {
+				ctr++
+				attendu := "Soustraction"
+				obtenu, ok := r.(string)
+				if !ok {
+					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
+				}
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
+			}
+		}()
+		ei12    := Creer(li12)
+		Soustraction(ei12, nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 
 }
