@@ -296,16 +296,19 @@ func TestEns(t *testing.T) {
 	}
 
 	{ // appeler
-		mr := make(map[int]int)
-		f := func(i int) {
-			j := i+2
-			mr[i] = j
+		f := func(i int) int {
+			return i+2
 		}
-		ei23.appeler(f)
-		for i, obtenu := range mr {
-			attendu := i+2
-			if attendu != obtenu {
-				t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+		li := ei23.lister().([]int)
+		lj := ei23.appeler(f).([]int)
+		if len(li) != len(lj) {
+			t.Errorf(test+": attendu %v != obtenu %v\n", len(li), len(lj))
+		} else {
+			for i, obtenu := range lj {
+				attendu := f(li[i]) // l'ordre est coherent entre 'li' et 'lj'
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
 			}
 		}
 	}

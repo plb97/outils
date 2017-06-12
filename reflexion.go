@@ -11,7 +11,7 @@ import (
 	"sort"
 )
 
-// la fonction 'lister_cles' relourne la liste des cles d'une 'map' quelconque
+// la fonction 'lister_cles' retourne la liste des cles d'une 'map' quelconque
 // si cela est possible les cles sont triees par ordre croissant
 // ATTENTION : 'lister_cles' n'est pas sure dans un contexte d'execution en parallele (multi threads/task)
 func lister_cles(i interface{}) interface{} {
@@ -459,19 +459,6 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 	}
 	ns := tf.NumOut()
 	lx := reflect.ValueOf(pe.lister())
-	var ts reflect.Type
-	switch ns {
-	case 0: // rien
-	case 1:
-		ts = tf.Out(0)
-	default:
-		lst := make([]reflect.StructField, 0)
-		for i := 0; i < ns; i++ {
-			lst = append(lst, reflect.StructField{Name: fmt.Sprintf("R%v", i), Type: tf.Out(i)})
-		}
-		ts = reflect.StructOf(lst)
-	}
-
 	switch ns {
 	case 0:
 		for i := 0; i < lx.Len(); i++ {
@@ -481,6 +468,7 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 		}
 		return nil
 	case 1:
+		ts := tf.Out(0)
 		ls := reflect.MakeSlice(reflect.SliceOf(ts), 0, lx.Len())
 		for i := 0; i < lx.Len(); i++ {
 			vi := lx.Index(i).Convert(ti)
@@ -490,6 +478,11 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 		}
 		return ls.Interface()
 	default:
+		lst := make([]reflect.StructField, 0)
+		for i := 0; i < ns; i++ {
+			lst = append(lst, reflect.StructField{Name: fmt.Sprintf("R%v", i), Type: tf.Out(i)})
+		}
+		ts := reflect.StructOf(lst)
 		ls := reflect.MakeSlice(reflect.SliceOf(ts), 0, lx.Len())
 		for i := 0; i < lx.Len(); i++ {
 			vi := lx.Index(i).Convert(ti)

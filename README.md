@@ -2,7 +2,7 @@
 
 Le point de départ de ces **exemples** est le besoin de récupération de la liste des clés d'une *'map'* quel que soit sont type.
 
-Pour cela l'utilisation du package __*'reflect'*__ s'est imposée.
+Pour cela le recours au package __*'reflect'*__ s'est imposé.
 Les conclusions des nombreux tâtonnements autour de l'utilisation de ce package sont données ici.
 
 ## Liste des clés d'une 'map'
