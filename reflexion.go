@@ -188,7 +188,7 @@ func creer(i interface{}) *ens_t {
 	ind := !t.Comparable() ||
 		reflect.Ptr == t.Kind() ||
 		reflect.Interface == t.Kind() // indicateur d'indirection
-	e := new_ens_t(ind,t).ajouter_liste(vi)
+	e := new_ens_t(ind,t).inserer_liste(vi)
 	return e
 }
 
@@ -204,17 +204,13 @@ func (pe *ens_t) copier() *ens_t {
 }
 
 // la fonction 'ajouter' permet d'ajouter a l'ensemble l'element passe en parametre
-func (pe *ens_t) ajouter(i interface{}) *ens_t {
-	if nil == i {
-		panic("ajouter")
-	}
-	v := reflect.ValueOf(i)
+func (pe *ens_t) inserer(v reflect.Value) *ens_t {
 	if !v.Type().ConvertibleTo(pe.t) {
 		panic(fmt.Sprintf("ajouter : pe.t=%v v=%v",pe.t.Kind(), v.Kind()))
 	}
 	v = v.Convert(pe.t)
 	if pe.ind {
-		k := ident(i)
+		k := ident(v.Interface())
 		if _, ok := pe.msi[k]; !ok {
 			ki := pe.m.Len() // nouvel index
 			pe.m.SetMapIndex(reflect.ValueOf(ki), v)
@@ -225,22 +221,28 @@ func (pe *ens_t) ajouter(i interface{}) *ens_t {
 	}
 	return pe
 }
-
-// la fonction 'ajouter_liste' permet d'ajouter a l'ensemble tous les elements de la liste passee en parametre
+// la fonction 'inserer_liste' permet d'ajouter a l'ensemble tous les elements de la liste passee en parametre
 // REMARQUE : la fonction 'ajouter' pourrait etre rendue "elliptique" mais cela ne serait pas equivalent
 //            car une liste d'interfaces n'est pas une interface liste
-func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
+func (pe *ens_t) inserer_liste(vl reflect.Value) *ens_t {
 	for i := 0; i < vl.Len(); i++ {
-		pe.ajouter(vl.Index(i).Interface())
+		pe.inserer(vl.Index(i))
 	}
 	return pe
 }
-
-// la fonction 'retirer' permet de retirer de l'ensemble l'element passe en parametre
-func (pe *ens_t) retirer(v reflect.Value) *ens_t {
-	if pe.t.Kind() != v.Kind() {
+// la fonction 'ajouter' permet d'ajouter a l'ensemble l'element passe en parametre
+func (pe *ens_t) ajouter(i interface{}) *ens_t {
+	if nil != i {
+		pe.inserer(reflect.ValueOf(i))
+	}
+	return pe
+}
+// la fonction 'supprimer' permet de retirer de l'ensemble l'element passe en parametre
+func (pe *ens_t) supprimer(v reflect.Value) *ens_t {
+	if !v.Type().ConvertibleTo(pe.t) {
 		return pe
 	}
+	v = v.Convert(pe.t)
 	if pe.ind {
 		k := ident(v.Interface())
 		if ki, ok := pe.msi[k]; ok {
@@ -249,6 +251,13 @@ func (pe *ens_t) retirer(v reflect.Value) *ens_t {
 		}
 	} else {
 		pe.m.SetMapIndex(v, nulle)
+	}
+	return pe
+}
+// la fonction 'retirer' permet d'ajouter a l'ensemble l'element passe en parametre
+func (pe *ens_t) retirer(i interface{}) *ens_t {
+	if nil != i {
+		pe.supprimer(reflect.ValueOf(i))
 	}
 	return pe
 }
@@ -369,7 +378,7 @@ func (pe *ens_t) unir(px *ens_t) *ens_t {
 			elmt = px.m.MapIndex(elmt)
 		}
 		if !pe.contient(elmt) {
-			pe.ajouter(elmt.Interface())
+			pe.inserer(elmt)
 		}
 	}
 	return pe
@@ -388,7 +397,7 @@ func (pe *ens_t) intersecter(px *ens_t) *ens_t {
 			elmt = pe.m.MapIndex(elmt)
 		}
 		if !px.contient(elmt) {
-			pe.retirer(elmt)
+			pe.supprimer(elmt)
 		}
 		if 0 == pe.m.Len() {
 			break // inutile de continuer
@@ -411,7 +420,7 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 				elmt = pe.m.MapIndex(elmt)
 			}
 			if px.contient(elmt) {
-				pe.retirer(elmt)
+				pe.supprimer(elmt)
 			}
 			if 0 == pe.m.Len() {
 				break // inutile de continuer
@@ -423,7 +432,7 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 				elmt = px.m.MapIndex(elmt)
 			}
 			if pe.contient(elmt) {
-				pe.retirer(elmt)
+				pe.supprimer(elmt)
 			}
 			if 0 == pe.m.Len() {
 				break // inutile de continuer
@@ -436,20 +445,20 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 // la fonction appelee doit avoir un seul parametre dont le 'type' doit etre le meme qui celui des elements de l'ensemble
 func (pe *ens_t) appeler(i interface{}) interface{} {
 	if nil == pe || nil == i {
-		panic("Appliquer")
+		panic("appler")
 	}
 	vf := reflect.ValueOf(i)
 	tf := vf.Type()
 	if reflect.Func != tf.Kind() {
-		panic("Appeler")
+		panic("appeler")
 	}
 	ne := tf.NumIn()
 	if 1 != ne {
-		panic("Appliquer")
+		panic("appeler")
 	}
 	ti := tf.In(0)
 	if !pe.t.ConvertibleTo(ti) {
-		panic("Appliquer")
+		panic("appeler")
 	}
 	ns := tf.NumOut()
 	lx := reflect.ValueOf(pe.lister())
@@ -503,7 +512,7 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 func intersection(lpx ...*ens_t) *ens_t {
 	if 0 == len(lpx) {
 		//return nil
-		panic("Intersection")
+		panic("intersection")
 	}
 	// tri par ordre croissant du nombre d'elements
 	for i := 0; i < len(lpx); i++ {
@@ -527,8 +536,7 @@ func intersection(lpx ...*ens_t) *ens_t {
 // la fonction 'union' retourne l'ensemble des elements de tous les ensembles passes en parametre
 func union(lpx ...*ens_t) *ens_t {
 	if 0 == len(lpx) {
-		//return nil
-		panic("Union")
+		panic("union")
 	}
 	var pe *ens_t
 	for i := 0; i < len(lpx); i++ {
@@ -548,7 +556,7 @@ func union(lpx ...*ens_t) *ens_t {
 // la fonction 'soustraction' retourne l'ensemble des elements de l'ensemble passe en premier parametre n'appartenant a aucun des ensembles passes en parametre suivant
 func soustraction(py *ens_t, lpx ...*ens_t) *ens_t {
 	if nil == py {
-		return nil
+		panic("soustraction")
 	}
 	pe := py.copier()
 	for _, px := range lpx {
@@ -636,7 +644,10 @@ func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
 		panic("Ajouter")
 	}
 	for _, i := range li {
-		pe.ajouter(reflect.ValueOf(i).Interface())
+		if nil == i {
+			panic("Ajouter")
+		}
+		pe.inserer(reflect.ValueOf(i))
 	}
 	return pe
 }
@@ -647,7 +658,10 @@ func (pe *ens_t) Retirer(li ...interface{}) Ensemble {
 		panic("Retirer")
 	}
 	for _, i := range li {
-		pe.retirer(reflect.ValueOf(i))
+		if nil == i {
+			panic("Retirer")
+		}
+		pe.supprimer(reflect.ValueOf(i))
 		if 0 == pe.m.Len() {
 			break // iuntile de continuer
 		}
@@ -665,7 +679,7 @@ func (pe *ens_t) Lister() interface{} {
 
 // la fonction 'Contient' permet de verifier si l'element passe en parametre appartient a l'ensemble
 func (pe *ens_t) Contient(i interface{}) bool {
-	if nil == pe {
+	if nil == pe || nil == i {
 		panic("Contient")
 	}
 	return pe.contient(reflect.ValueOf(i))
@@ -689,7 +703,7 @@ func (pe *ens_t) Vide() bool {
 
 // la fonction 'Egal' permet de verifier l'egalite de l'ensemble et de l' 'Ensemble' passe en parametre
 func (pe *ens_t) Egal(x Ensemble) bool {
-	if nil == pe {
+	if nil == pe || nil == x  {
 		panic("Egal")
 	}
 	px := conv(x)
@@ -698,7 +712,7 @@ func (pe *ens_t) Egal(x Ensemble) bool {
 
 // la fonction 'Unir' permet d'ajouter a l'ensemble les elements de l'ensemble passe en parametre
 func (pe *ens_t) Unir(x Ensemble) Ensemble {
-	if nil == pe {
+	if nil == pe || nil == x {
 		panic("Unir")
 	}
 	px := conv(x)
@@ -707,7 +721,7 @@ func (pe *ens_t) Unir(x Ensemble) Ensemble {
 
 // la fonction 'Intersecter' permet de retirer de l'ensemble les elements n'appartenant pas a l' 'Ensemble' passe en parametre
 func (pe *ens_t) Intersecter(x Ensemble) Ensemble {
-	if nil == pe {
+	if nil == pe || nil == x  {
 		panic("Intersecter")
 	}
 	px := conv(x)
@@ -716,7 +730,7 @@ func (pe *ens_t) Intersecter(x Ensemble) Ensemble {
 
 // la fonction 'Soustraire' permet de retirer de l'ensemble les elements appartenant aussi a l' 'Ensemble' passe en parametre
 func (pe *ens_t) Soustraire(x Ensemble) Ensemble {
-	if nil == pe {
+	if nil == pe || nil == x  {
 		panic("Soustraire")
 	}
 	px := conv(x)
@@ -726,7 +740,7 @@ func (pe *ens_t) Soustraire(x Ensemble) Ensemble {
 // la fonction 'Appeler' permet d'appeler pour chaque element de l'ensemble la fonction passee en parametre
 // la fonction appelee doit avoir un seul parametre dont le 'type' doit etre le meme qui celui des elements de l'ensemble
 func (pe *ens_t) Appeler(i interface{}) interface{} {
-	if nil == pe {
+	if nil == pe || nil == i  {
 		panic("Appeler")
 	}
 	return pe.appeler(i)
@@ -734,31 +748,46 @@ func (pe *ens_t) Appeler(i interface{}) interface{} {
 
 // la fonction 'Intersection' retourne l'ensemble des elements communs a tous les 'Ensembles' passes parametre
 func Intersection(lpe ...Ensemble) Ensemble {
-	lpx := make([]*ens_t, len(lpe))
-	for i, x := range lpe {
-		px := conv(x)
-		lpx[i] = px
+	lpx := make([]*ens_t, 0)
+	for _, x := range lpe {
+		if nil != x  {
+			px := conv(x)
+			lpx = append(lpx,px)
+		}
+	}
+	if 0 == len(lpx) {
+		panic("Intersection")
 	}
 	return intersection(lpx...)
 }
 
 // la fonction 'Union' retourne l'ensemble des elements de tous les 'Ensembles' passes en parametre
 func Union(lpe ...Ensemble) Ensemble {
-	lpx := make([]*ens_t, len(lpe))
-	for i, x := range lpe {
-		px := conv(x)
-		lpx[i] = px
+	lpx := make([]*ens_t, 0)
+	for _, x := range lpe {
+		if nil != x  {
+			px := conv(x)
+			lpx = append(lpx,px)
+		}
+	}
+	if 0 == len(lpx) {
+		panic("Union")
 	}
 	return union(lpx...)
 }
 
 // la fonction 'Soustraction' retourne l'ensemble des elements du premier parametre n'appartenant a aucun 'Ensemble' passe en parametre suivant
 func Soustraction(y Ensemble, lpe ...Ensemble) Ensemble {
+	if nil == y  {
+		panic("Soustraction")
+	}
 	py := conv(y)
-	lpx := make([]*ens_t, len(lpe))
-	for i, x := range lpe {
-		px := conv(x)
-		lpx[i] = px
+	lpx := make([]*ens_t, 0)
+	for _, x := range lpe {
+		if nil != x  {
+			px := conv(x)
+			lpx = append(lpx,px)
+		}
 	}
 	return soustraction(py, lpx...)
 }
