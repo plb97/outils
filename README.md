@@ -43,3 +43,6 @@ Les actions suivantes peuvent s'effecteur sur un *'Ensemble'* :
 **Soustraire**(x Ensemble) Ensemble | soustraire l'ensemble passé en paramètre de l'ensemble
 **Intersecter**(x Ensemble) Ensemble | croiser l'ensemble passé en paramètre avec l'ensemble
 **Appeler**(i interface{}) interface{} | appeler la fonction passée en paramètre pour chaque élément de l'ensemble
+
+## Tests
+Des tests de ce package se trouvent dans *'reflexion_test.go'* qui donne des exemples d'utilisation courante ainsi que des cas d'erreurs avec appel de la fonction *'panic'*.
