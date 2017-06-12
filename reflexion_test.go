@@ -160,7 +160,7 @@ func TestEns(t *testing.T) {
 		attendu := make([]int, len(li21))
 		copy(attendu, li21)             // ([]{2,1,2})
 		sort.Ints(attendu)              // ([]{1,2,2})
-		obtenu := ei21.Lister().([]int) // ([]{1,2})
+		obtenu := ei21.lister().([]int) // ([]{1,2})
 		if reflect.DeepEqual(attendu, obtenu) {
 			t.Errorf(test+": attendu %v == obtenu %v\n", attendu, obtenu)
 		}
@@ -269,20 +269,6 @@ func TestEns(t *testing.T) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
-	{ // soustraction
-		attendu := ei12
-		obtenu := soustraction(ei12, nil)
-		if !attendu.egal(obtenu) { // ensembles pas egaux
-			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
-		}
-	}
-	//{ // soustraction
-	//	var attendu *ens_t
-	//	obtenu := soustraction(nil, ei12)
-	//	if !attendu.egal(obtenu) { // ensembles pas egaux
-	//		t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
-	//	}
-	//}
 	{ // soustraction
 		attendu := ei12
 		obtenu := soustraction(ei21, ei34)
@@ -425,9 +411,9 @@ func TestEnsInd(t *testing.T) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
 	}
-	{ // ajouter
+	{ // inserer
 		attendu := creer([]*ens_t{ei12,esab})
-		obtenu := creer([]*ens_t{ei12}).ajouter(esab)
+		obtenu := creer([]*ens_t{ei12}).inserer(esab)
 		if !obtenu.egal(attendu) {
 			t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 		}
@@ -441,8 +427,10 @@ func TestEnsPanic(t *testing.T) {
 	test := "TestEnsPanic"
 	fmt.Println(test)
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "creer"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -454,11 +442,16 @@ func TestEnsPanic(t *testing.T) {
 			}
 		}()
 		creer(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
-				attendu := "ajouter"
+				ctr++
+				attendu := "inserer"
 				obtenu, ok := r.(string)
 				if !ok {
 					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
@@ -469,11 +462,37 @@ func TestEnsPanic(t *testing.T) {
 			}
 		}()
 		ei12    := creer(li12)
-		ei12.ajouter(nil)
+		ei12.inserer(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
+				attendu := "supprimer"
+				obtenu, ok := r.(string)
+				if !ok {
+					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
+				}
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
+			}
+		}()
+		ei12    := creer(li12)
+		ei12.supprimer(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
+	}()
+	func() {
+		ctr := 0
+		defer func() {
+			if r := recover(); r != nil {
+				ctr++
 				attendu := "unir"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -486,10 +505,15 @@ func TestEnsPanic(t *testing.T) {
 		}()
 		ei12    := creer(li12)
 		ei12.unir(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
 				attendu := "egal"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -502,11 +526,16 @@ func TestEnsPanic(t *testing.T) {
 		}()
 		ei12    := creer(li12)
 		ei12.egal(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
-				attendu := "Intersection"
+				ctr++
+				attendu := "intersection"
 				obtenu, ok := r.(string)
 				if !ok {
 					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
@@ -517,11 +546,16 @@ func TestEnsPanic(t *testing.T) {
 			}
 		}()
 		intersection(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
-				attendu := "Union"
+				ctr++
+				attendu := "intersection"
 				obtenu, ok := r.(string)
 				if !ok {
 					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
@@ -529,14 +563,60 @@ func TestEnsPanic(t *testing.T) {
 				if attendu != obtenu {
 					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
 				}
-				fmt.Println(fmt.Sprintf("Panic dans %#v", r))
+			}
+		}()
+		ei12    := creer(li12)
+		intersection(ei12,nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
+	}()
+	func() {
+		ctr := 0
+		defer func() {
+			if r := recover(); r != nil {
+				ctr++
+				attendu := "union"
+				obtenu, ok := r.(string)
+				if !ok {
+					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
+				}
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
 			}
 		}()
 		union(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 	func() {
+		ctr := 0
 		defer func() {
 			if r := recover(); r != nil {
+				ctr++
+				attendu := "union"
+				obtenu, ok := r.(string)
+				if !ok {
+					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
+				}
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
+			}
+		}()
+		ei12    := creer(li12)
+		union(ei12,nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
+	}()
+	func() {
+		ctr := 0
+		defer func() {
+			if r := recover(); r != nil {
+				ctr++
 				attendu := "soustraction"
 				obtenu, ok := r.(string)
 				if !ok {
@@ -548,6 +628,30 @@ func TestEnsPanic(t *testing.T) {
 			}
 		}()
 		soustraction(nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
+	}()
+	func() {
+		ctr := 0
+		defer func() {
+			if r := recover(); r != nil {
+				ctr++
+				attendu := "soustraction"
+				obtenu, ok := r.(string)
+				if !ok {
+					t.Errorf(test+": attendu %v != obtenu %v\n", !ok, ok)
+				}
+				if attendu != obtenu {
+					t.Errorf(test+": attendu %v != obtenu %v\n", attendu, obtenu)
+				}
+			}
+		}()
+		ei12    := creer(li12)
+		soustraction(ei12,nil)
+		if 1 != ctr {
+			t.Errorf(test+": attendu %v != obtenu %v\n", 1, ctr)
+		}
 	}()
 
 }

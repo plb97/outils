@@ -188,7 +188,7 @@ func creer(i interface{}) *ens_t {
 	ind := !t.Comparable() ||
 		reflect.Ptr == t.Kind() ||
 		reflect.Interface == t.Kind() // indicateur d'indirection
-	e := new_ens_t(ind,t).inserer_liste(vi)
+	e := new_ens_t(ind,t).ajouter_liste(vi)
 	return e
 }
 
@@ -204,7 +204,7 @@ func (pe *ens_t) copier() *ens_t {
 }
 
 // la fonction 'ajouter' permet d'ajouter a l'ensemble l'element passe en parametre
-func (pe *ens_t) inserer(v reflect.Value) *ens_t {
+func (pe *ens_t) ajouter(v reflect.Value) *ens_t {
 	if !v.Type().ConvertibleTo(pe.t) {
 		panic(fmt.Sprintf("ajouter : pe.t=%v v=%v",pe.t.Kind(), v.Kind()))
 	}
@@ -221,24 +221,25 @@ func (pe *ens_t) inserer(v reflect.Value) *ens_t {
 	}
 	return pe
 }
-// la fonction 'inserer_liste' permet d'ajouter a l'ensemble tous les elements de la liste passee en parametre
+// la fonction 'ajouter_liste' permet d'ajouter a l'ensemble tous les elements de la liste passee en parametre
 // REMARQUE : la fonction 'ajouter' pourrait etre rendue "elliptique" mais cela ne serait pas equivalent
 //            car une liste d'interfaces n'est pas une interface liste
-func (pe *ens_t) inserer_liste(vl reflect.Value) *ens_t {
+func (pe *ens_t) ajouter_liste(vl reflect.Value) *ens_t {
 	for i := 0; i < vl.Len(); i++ {
-		pe.inserer(vl.Index(i))
+		pe.ajouter(vl.Index(i))
 	}
 	return pe
 }
-// la fonction 'ajouter' permet d'ajouter a l'ensemble l'element passe en parametre
-func (pe *ens_t) ajouter(i interface{}) *ens_t {
-	if nil != i {
-		pe.inserer(reflect.ValueOf(i))
+// la fonction 'inserer' permet d'ajouter a l'ensemble l'element passe en parametre
+func (pe *ens_t) inserer(i interface{}) *ens_t {
+	if nil == i {
+		panic("inserer")
 	}
+	pe.ajouter(reflect.ValueOf(i))
 	return pe
 }
-// la fonction 'supprimer' permet de retirer de l'ensemble l'element passe en parametre
-func (pe *ens_t) supprimer(v reflect.Value) *ens_t {
+// la fonction 'retirer' permet de retirer de l'ensemble l'element passe en parametre
+func (pe *ens_t) retirer(v reflect.Value) *ens_t {
 	if !v.Type().ConvertibleTo(pe.t) {
 		return pe
 	}
@@ -254,11 +255,12 @@ func (pe *ens_t) supprimer(v reflect.Value) *ens_t {
 	}
 	return pe
 }
-// la fonction 'retirer' permet d'ajouter a l'ensemble l'element passe en parametre
-func (pe *ens_t) retirer(i interface{}) *ens_t {
-	if nil != i {
-		pe.supprimer(reflect.ValueOf(i))
+// la fonction 'supprimer' permet d'ajouter a l'ensemble l'element passe en parametre
+func (pe *ens_t) supprimer(i interface{}) *ens_t {
+	if nil == i {
+		panic("supprimer")
 	}
+	pe.retirer(reflect.ValueOf(i))
 	return pe
 }
 
@@ -317,13 +319,10 @@ func (pe *ens_t) vide() bool {
 // la fonction 'egal' permet de verifier l'egalite de l'ensemble et de l'ensemble passe en parametre
 // REMARQUE : reflect.DeepEqual(pe,px) ne donne pas le resultat voulu
 func (pe *ens_t) egal(px *ens_t) bool {
-	if nil == px {
-		return pe == px // vrai si pe == nil faux sinon
+	if nil == pe || nil == px {
+		panic("egal")
 	}
-	if nil == pe {
-		return false
-	}
-	ok := pe.t.Kind() == px.t.Kind() && pe.m.Len() == px.m.Len()
+	ok := px.t.ConvertibleTo(pe.t) && pe.m.Len() == px.m.Len()
 	// REMARQUE : deux ensembles sont egaux s'il ont le meme type d'elements y compris les ensembles vides
 	if ok {
 		if pe.ind {
@@ -364,21 +363,19 @@ func (pe *ens_t) egal(px *ens_t) bool {
 
 // la fonction 'unir' permet d'ajouter a l'ensemble les elements de l'ensemble passe en parametre
 func (pe *ens_t) unir(px *ens_t) *ens_t {
-	if nil == pe {
+	if nil == pe || nil == px {
 		panic("unir")
 	}
-	if nil == px {
-		return pe
-	}
-	if pe.t.Kind() != px.t.Kind() {
+	if !px.t.ConvertibleTo(pe.t) {
 		panic("unir")
 	}
 	for _, elmt := range px.m.MapKeys() {
 		if px.ind {
 			elmt = px.m.MapIndex(elmt)
 		}
+		elmt.Convert(pe.t)
 		if !pe.contient(elmt) {
-			pe.inserer(elmt)
+			pe.ajouter(elmt)
 		}
 	}
 	return pe
@@ -397,7 +394,7 @@ func (pe *ens_t) intersecter(px *ens_t) *ens_t {
 			elmt = pe.m.MapIndex(elmt)
 		}
 		if !px.contient(elmt) {
-			pe.supprimer(elmt)
+			pe.retirer(elmt)
 		}
 		if 0 == pe.m.Len() {
 			break // inutile de continuer
@@ -420,7 +417,7 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 				elmt = pe.m.MapIndex(elmt)
 			}
 			if px.contient(elmt) {
-				pe.supprimer(elmt)
+				pe.retirer(elmt)
 			}
 			if 0 == pe.m.Len() {
 				break // inutile de continuer
@@ -432,7 +429,7 @@ func (pe *ens_t) soustraire(px *ens_t) *ens_t {
 				elmt = px.m.MapIndex(elmt)
 			}
 			if pe.contient(elmt) {
-				pe.supprimer(elmt)
+				pe.retirer(elmt)
 			}
 			if 0 == pe.m.Len() {
 				break // inutile de continuer
@@ -511,8 +508,12 @@ func (pe *ens_t) appeler(i interface{}) interface{} {
 // la fonction 'intersection' retourne l'ensemble des elements communs a tous les ensembles passes en parametre
 func intersection(lpx ...*ens_t) *ens_t {
 	if 0 == len(lpx) {
-		//return nil
 		panic("intersection")
+	}
+	for i := 0; i < len(lpx); i++ {
+		if nil == lpx[i] {
+			panic("intersection")
+		}
 	}
 	// tri par ordre croissant du nombre d'elements
 	for i := 0; i < len(lpx); i++ {
@@ -538,15 +539,13 @@ func union(lpx ...*ens_t) *ens_t {
 	if 0 == len(lpx) {
 		panic("union")
 	}
-	var pe *ens_t
 	for i := 0; i < len(lpx); i++ {
-		if nil != lpx[i] {
-			pe = lpx[i].copier()
-			lpx = lpx[1:]
-			break
+		if nil == lpx[i] {
+			panic("union")
 		}
-		lpx = lpx[1:]
 	}
+	pe := lpx[0].copier()
+	lpx = lpx[1:]
 	for _, px := range lpx {
 		pe.unir(px)
 	}
@@ -557,6 +556,11 @@ func union(lpx ...*ens_t) *ens_t {
 func soustraction(py *ens_t, lpx ...*ens_t) *ens_t {
 	if nil == py {
 		panic("soustraction")
+	}
+	for i := 0; i < len(lpx); i++ {
+		if nil == lpx[i] {
+			panic("soustraction")
+		}
 	}
 	pe := py.copier()
 	for _, px := range lpx {
@@ -647,7 +651,7 @@ func (pe *ens_t) Ajouter(li ...interface{}) Ensemble {
 		if nil == i {
 			panic("Ajouter")
 		}
-		pe.inserer(reflect.ValueOf(i))
+		pe.ajouter(reflect.ValueOf(i))
 	}
 	return pe
 }
@@ -661,7 +665,7 @@ func (pe *ens_t) Retirer(li ...interface{}) Ensemble {
 		if nil == i {
 			panic("Retirer")
 		}
-		pe.supprimer(reflect.ValueOf(i))
+		pe.retirer(reflect.ValueOf(i))
 		if 0 == pe.m.Len() {
 			break // iuntile de continuer
 		}
